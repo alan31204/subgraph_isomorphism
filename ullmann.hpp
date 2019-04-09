@@ -16,6 +16,10 @@ using namespace std;
 
 
 class Vertex;
+struct weight_vertex;
+class Edge;
+class Graph;
+
 
 
 class Vertex{

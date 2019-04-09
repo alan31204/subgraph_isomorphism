@@ -8,6 +8,10 @@
 #include <cstring>
 #include <string>
 #include <mutex>
+#include <fstream>
+#include "ullmann.hpp"
+
+using namespace std;
 
 Vertex::Vertex(){
 
@@ -19,11 +23,12 @@ Vertex::Vertex(int id){
 	this->incidentSet = vector<Edge>();
 }
 
+/*
 vector<struct weight_vertex> Vertex::neighbors(){
 	vector<struct weight_vertex> neighbors;
 
 	return neighbors;
-}
+}*/
 
 // Special design to make priority queue for minimum by changing < and >
 bool Vertex::operator<(const Vertex& v2) const{
@@ -110,3 +115,16 @@ Graph loadGraph(string filename){
 	}
 	return graph;
 }
+
+
+
+int main(int argc, char* argv[]){
+
+
+
+
+
+	return 0;
+}
+
+
