@@ -125,7 +125,8 @@ bool ullmann(Graph& gA, Graph& gB){
 	int deg;
 	unordered_set<int>* carray[vnumA];
 
-	// initialize candidate sets for each vertex in gA and begin adding candidates
+	// initialize candidate sets for each vertex in gA and begin adding candidates with
+	//   some primary pruning
 	for(int i = 0;i < vnumA;i++){
 		carray[i] = new unordered_set<int>();
 
@@ -134,6 +135,13 @@ bool ullmann(Graph& gA, Graph& gB){
 		for(auto& v : gB.vertices){
 			if(deg <= v.degree)
 				(*carray[i]).insert(v.id);
+		}
+	}
+
+	// secondary pruning
+	for(int i = 0;i < vnumA;i++){
+		for(auto& c : *carray[i]){
+			
 		}
 	}
 
