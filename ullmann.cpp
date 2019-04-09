@@ -119,7 +119,25 @@ Graph loadGraph(string filename){
 	return graph;
 }
 
+// returns true if gA is a subgraph of gB and false otherwise
+bool ullmann(Graph& gA, Graph& gB){
+	int vnumA = gA.vertices.size();
+	int deg;
+	unordered_set<int>* carray[vnumA];
 
+	// initialize candidate sets for each vertex in gA and begin adding candidates
+	for(int i = 0;i < vnumA;i++){
+		carray[i] = new unordered_set<int>();
+
+		deg = gA.findIndex(i).degree;
+		for(auto& v : gB.vertices){
+			if(deg <= v.degree)
+				carray[i].insert(v.id);
+		}
+	}
+
+	return false;
+}
 
 int main(int argc, char* argv[]){
 
