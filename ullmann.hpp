@@ -1,3 +1,6 @@
+// Authors: Max Kimmelman (mkimmelm@u.rochester.edu)
+//			Alan Chiu (pchiu4@u.rochester.edu)
+
 #include <cstdlib>
 #include <ctime>
 #include <climits>

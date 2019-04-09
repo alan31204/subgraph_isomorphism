@@ -1,3 +1,6 @@
+// Authors: Max Kimmelman (mkimmelm@u.rochester.edu)
+//			Alan Chiu (pchiu4@u.rochester.edu)
+
 #include <iostream>
 #include <vector>
 #include <set>
