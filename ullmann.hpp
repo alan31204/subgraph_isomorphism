@@ -44,3 +44,15 @@ public:
 	Vertex* other(Vertex v) const;
 	
 };
+
+
+class Graph{
+public: 
+	vector<Vertex> vertices;
+	vector<Edge> edges;
+	Graph();
+	void addVertex(Vertex v);
+	void addEdge(Edge e);
+	Vertex findIndex(int index);
+
+};
