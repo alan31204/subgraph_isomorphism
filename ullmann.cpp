@@ -12,6 +12,7 @@
 #include <string>
 #include <mutex>
 #include <fstream>
+#include <unordered_set>
 #include "ullmann.hpp"
 
 using namespace std;
@@ -107,6 +108,7 @@ Graph loadGraph(string filename){
 	// vector starts from 0 with number 1
 	int v1; 
 	int v2;
+	int w;
 	while(!input.eof()){
 		input >> v1 >> v2 >> w;
 		Vertex* vertex1 = &graph.vertices[v1];
@@ -127,10 +129,11 @@ bool ullmann(Graph& gA, Graph& gB){
 	for(int i = 0;i < vnumA;i++){
 		carray[i] = new unordered_set<int>();
 
+		// adds vertex to candidate set if has greater or equal degree
 		deg = gA.findIndex(i).degree;
 		for(auto& v : gB.vertices){
 			if(deg <= v.degree)
-				carray[i].insert(v.id);
+				(*carray[i]).insert(v.id);
 		}
 	}
 
@@ -145,7 +148,6 @@ int main(int argc, char* argv[]){
 			file = (argv[j+1]);
 		}
 	}
-
 
 
 
