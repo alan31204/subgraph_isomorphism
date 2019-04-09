@@ -107,12 +107,10 @@ Graph loadGraph(string filename){
 	// vector starts from 0 with number 1
 	int v1; 
 	int v2;
-	double w;
 	while(!input.eof()){
 		input >> v1 >> v2 >> w;
 		Vertex* vertex1 = &graph.vertices[v1];
 		Vertex* vertex2 = &graph.vertices[v2];
-		// Edge e = Edge(vertex1, vertex2, w);
 		Edge e = Edge(vertex1, vertex2);
 		graph.addEdge(e);
 	}
