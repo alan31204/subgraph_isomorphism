@@ -120,7 +120,13 @@ Graph loadGraph(string filename){
 
 
 int main(int argc, char* argv[]){
+	string file = "graphs/graph10";
 
+	for(int j =1; j<argc; j++){
+		if(strcmp(argv[j], "-g")==0 && j+1 <argc){
+			file = (argv[j+1]);
+		}
+	}
 
 
 
