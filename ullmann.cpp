@@ -107,12 +107,10 @@ Graph loadGraph(string filename){
 	// vector starts from 0 with number 1
 	int v1; 
 	int v2;
-	double w;
 	while(!input.eof()){
 		input >> v1 >> v2 >> w;
 		Vertex* vertex1 = &graph.vertices[v1];
 		Vertex* vertex2 = &graph.vertices[v2];
-		// Edge e = Edge(vertex1, vertex2, w);
 		Edge e = Edge(vertex1, vertex2);
 		graph.addEdge(e);
 	}
@@ -140,7 +138,13 @@ bool ullmann(Graph& gA, Graph& gB){
 }
 
 int main(int argc, char* argv[]){
+	string file = "graphs/graph10";
 
+	for(int j =1; j<argc; j++){
+		if(strcmp(argv[j], "-g")==0 && j+1 <argc){
+			file = (argv[j+1]);
+		}
+	}
 
 
 
