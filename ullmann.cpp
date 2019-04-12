@@ -144,6 +144,16 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
+
+	cout << "primary pruning" << endl;
+	for(int i = 0;i < vnumA;i++){
+		cout << i + 1 << ": ";
+		for(int c : *carray[i])
+			cout << c + 1 << " ";
+		cout << endl;
+	}
+
+
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
 		v = gA.findIndex(i);							// find vertex v with id i
@@ -168,6 +178,14 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
+	cout << "\n\nsecondary pruning\n" << endl;
+	for(int i = 0;i < vnumA;i++){
+		cout << i + 1 << ": ";
+		for(int c : *carray[i])
+			cout << c + 1 << " ";
+		cout << endl;
+	}
+
 	// check if isomorphism is still possible after pruning
 	for(int i = 0;i < vnumA;i++)
 		if((*carray[i]).empty()) return false;
@@ -178,15 +196,24 @@ bool ullmann(Graph& gA, Graph& gB){
 }
 
 int main(int argc, char* argv[]){
-	string file = "graphs/graph10";
+	string fileA = "graphs/A";
+	string fileB = "graphs/B";
 
-	for(int j =1; j<argc; j++){
-		if(strcmp(argv[j], "-g")==0 && j+1 <argc){
-			file = (argv[j+1]);
+	for(int i = 1;i < argc;i++){
+		if(strcmp(argv[i], "-gA") == 0 && i + 1 < argc){
+			fileA = (argv[i + 1]);
+		}
+		else if(strcmp(argv[i], "-gB") == 0 && i + 1 < argc){
+			fileB = (argv[i + 1]);
 		}
 	}
 
+	Graph graphA, graphB;
+	graphA = loadGraph(fileA);
+	graphB = loadGraph(fileB);
 
+	bool result = ullmann(ref(graphA), ref(graphB));
+	cout << "graph A is a subgraph of graph B? " << result << endl;
 
 	return 0;
 }
