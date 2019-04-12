@@ -109,15 +109,14 @@ Graph loadGraph(string filename){
 		graph.vertices.push_back(v);
 	}
 	// vector starts from 0 with number 1
-	int v1; 
-	int v2;
-	int w;
-	while(!input.eof()){
+	int v1, v2, w, edgesAdded = 0;
+	while(!input.eof() && edgesAdded < numEdges){
 		input >> v1 >> v2 >> w;
 		Vertex* vertex1 = &graph.vertices[v1];
 		Vertex* vertex2 = &graph.vertices[v2];
 		Edge e = Edge(vertex1, vertex2);
 		graph.addEdge(e);
+		edgesAdded++;
 	}
 	return graph;
 }
@@ -125,6 +124,7 @@ Graph loadGraph(string filename){
 // returns true if gA is a subgraph of gB and false otherwise
 bool ullmann(Graph& gA, Graph& gB){
 	int vnumA = gA.vertices.size();
+	int vnumB = gB.vertices.size();
 	int deg;
 	unordered_set<int> *carray[vnumA], ncandidates;
 	vector<int> cneighbors;
@@ -145,7 +145,13 @@ bool ullmann(Graph& gA, Graph& gB){
 	}
 
 
-	cout << "primary pruning" << endl;
+	// for(int i = 0;i < vnumA;i++)
+	// 	cout << "A: deg(" << gA.findIndex(i).id << ") = " << gA.findIndex(i).degree << endl;
+
+	// for(int i = 0;i < vnumB;i++)
+	// 	cout << "B: deg(" << gB.findIndex(i).id << ") = " << gB.findIndex(i).degree << endl;
+
+	cout << "\n\nprimary pruning" << endl;
 	for(int i = 0;i < vnumA;i++){
 		cout << i << ": ";
 		for(int c : *carray[i])
