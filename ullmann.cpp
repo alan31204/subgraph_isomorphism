@@ -145,13 +145,13 @@ bool ullmann(Graph& gA, Graph& gB){
 	}
 
 	// secondary pruning
-	for(int i = 0;i < vnumA;i++){
-		v = gA.findIndex(i);
-		for(auto& c : *carray[i]){
-			cneighbors = gB.findIndex(c).neighbors();
-			for(int n : v.neighbors()){
-				disjoint = true;
-
+	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
+		v = gA.findIndex(i);							// find vertex v with id i
+		for(auto& c : *carray[i]){						// iterate over candidates for vertex
+			cneighbors = gB.findIndex(c).neighbors();	// find neighbors of selected candidate
+			for(int n : v.neighbors()){					// iterate over neighbors of v and 
+				disjoint = true;						//   determine if cneighbors and
+														//   v.neighbors() are disjoint
 				for(int cn : cneighbors){
 					ncandidates = *carray[n];
 					if(ncandidates.find(cn) != ncandidates.end()){
@@ -160,13 +160,19 @@ bool ullmann(Graph& gA, Graph& gB){
 					}
 				}
 
-				if(disjoint){
-					(*carray[i]).erase(c);
-					break;
-				}
+				if(disjoint){					// if cneighbors and v.neighbors() are disjoint
+					(*carray[i]).erase(c);		//   then c must be removed from v's candidate
+					break;						//   set, and then we can check v's next 
+				}								//   candidate, else, check for next neighbor
 			}
 		}
 	}
+
+	// check if isomorphism is still possible after pruning
+	for(int i = 0;i < vnumA;i++)
+		if((*carray[i]).empty()) return false;
+
+
 
 	return false;
 }
