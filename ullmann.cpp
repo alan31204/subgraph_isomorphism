@@ -149,7 +149,7 @@ bool ullmann(Graph& gA, Graph& gB){
 		v = gA.findIndex(i);
 		for(auto& c : *carray[i]){
 			cneighbors = gB.findIndex(c).neighbors();
-			for(int n : v.neighbors){
+			for(int n : v.neighbors()){
 				disjoint = true;
 
 				for(int cn : cneighbors){
