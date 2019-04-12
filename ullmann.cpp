@@ -104,7 +104,7 @@ Graph loadGraph(string filename){
 	input >> numVertices;
 	input >> numEdges;
 
-	for(int i = 0 ; i< numVertices;i++){
+	for(int i = 0 ; i < numVertices;i++){
 		Vertex v = Vertex(i);
 		graph.vertices.push_back(v);
 	}
@@ -147,9 +147,9 @@ bool ullmann(Graph& gA, Graph& gB){
 
 	cout << "primary pruning" << endl;
 	for(int i = 0;i < vnumA;i++){
-		cout << i + 1 << ": ";
+		cout << i << ": ";
 		for(int c : *carray[i])
-			cout << c + 1 << " ";
+			cout << c << " ";
 		cout << endl;
 	}
 
@@ -180,9 +180,9 @@ bool ullmann(Graph& gA, Graph& gB){
 
 	cout << "\n\nsecondary pruning\n" << endl;
 	for(int i = 0;i < vnumA;i++){
-		cout << i + 1 << ": ";
+		cout << i << ": ";
 		for(int c : *carray[i])
-			cout << c + 1 << " ";
+			cout << c << " ";
 		cout << endl;
 	}
 
