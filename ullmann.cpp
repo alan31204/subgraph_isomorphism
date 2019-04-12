@@ -27,12 +27,15 @@ Vertex::Vertex(int id){
 	this->incidentSet = vector<Edge>();
 }
 
-/*
-vector<struct weight_vertex> Vertex::neighbors(){
-	vector<struct weight_vertex> neighbors;
+// returns neighbors as vector of Vertex ids
+vector<int> Vertex::neighbors(){
+	vector<int> neighbors = vector<int>();
+
+	for(auto& e : this->incidentSet)
+		neighbors.push_back(e.other(*this)->id);
 
 	return neighbors;
-}*/
+}
 
 // Special design to make priority queue for minimum by changing < and >
 bool Vertex::operator<(const Vertex& v2) const{
@@ -123,7 +126,10 @@ Graph loadGraph(string filename){
 bool ullmann(Graph& gA, Graph& gB){
 	int vnumA = gA.vertices.size();
 	int deg;
-	unordered_set<int>* carray[vnumA];
+	unordered_set<int> *carray[vnumA], ncandidates;
+	vector<int> cneighbors;
+	Vertex v;
+	bool disjoint;
 
 	// initialize candidate sets for each vertex in gA and begin adding candidates with
 	//   some primary pruning
@@ -140,8 +146,25 @@ bool ullmann(Graph& gA, Graph& gB){
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){
+		v = gA.findIndex(i);
 		for(auto& c : *carray[i]){
-			
+			cneighbors = gB.findIndex(c).neighbors();
+			for(int n : v.neighbors){
+				disjoint = true;
+
+				for(int cn : cneighbors){
+					ncandidates = *carray[n];
+					if(ncandidates.find(cn) != ncandidates.end()){
+						disjoint = false;
+						break;
+					}
+				}
+
+				if(disjoint){
+					(*carray[i]).erase(c);
+					break;
+				}
+			}
 		}
 	}
 

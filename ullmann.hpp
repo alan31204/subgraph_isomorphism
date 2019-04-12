@@ -33,6 +33,7 @@ public:
 
 	Vertex();
 	Vertex(int id);
+	vector<int> neighbors();
 
 
 	bool operator<(const Vertex& v2) const;
