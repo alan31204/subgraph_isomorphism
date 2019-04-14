@@ -126,36 +126,38 @@ bool ullmann(Graph& gA, Graph& gB){
 	int vnumA = gA.vertices.size();
 	int vnumB = gB.vertices.size();
 	int deg;
-	unordered_set<int> *carray[vnumA], ncandidates;
+	// unordered_set<int> *carray[vnumA], ncandidates;
+	bool carray[vnumA][vnumB], cempty[vnumA];
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint;
 
-	// initialize candidate sets for each vertex in gA and begin adding candidates with
-	//   some primary pruning
+	// // initialize candidate sets for each vertex in gA and begin adding candidates with
+	// //   some primary pruning
+	// for(int i = 0;i < vnumA;i++){
+	// 	carray[i] = new unordered_set<int>();
+
+	// 	// adds vertex to candidate set if has greater or equal degree
+	// 	deg = gA.findIndex(i).degree;
+	// 	for(auto& v : gB.vertices){
+	// 		if(deg <= v.degree)
+	// 			(*carray[i]).insert(v.id);
+	// 	}
+	// }
+
+	// initialize candidate arrays while doing primary pruning and set all empty values to false
 	for(int i = 0;i < vnumA;i++){
-		carray[i] = new unordered_set<int>();
-
-		// adds vertex to candidate set if has greater or equal degree
 		deg = gA.findIndex(i).degree;
-		for(auto& v : gB.vertices){
-			if(deg <= v.degree)
-				(*carray[i]).insert(v.id);
-		}
+		for(int j = 0;j < vnumB;j++)
+			carray[i][j] = (deg <= gB.findIndex(j).degree);
+		cempty[i] = false;
 	}
-
-
-	// for(int i = 0;i < vnumA;i++)
-	// 	cout << "A: deg(" << gA.findIndex(i).id << ") = " << gA.findIndex(i).degree << endl;
-
-	// for(int i = 0;i < vnumB;i++)
-	// 	cout << "B: deg(" << gB.findIndex(i).id << ") = " << gB.findIndex(i).degree << endl;
 
 	cout << "\n\nprimary pruning" << endl;
 	for(int i = 0;i < vnumA;i++){
 		cout << i << ": ";
-		for(int c : *carray[i])
-			cout << c << " ";
+		for(int c = 0;c < vnumB;c++)
+			if(carray[i][c]) cout << c << " ";
 		cout << endl;
 	}
 
@@ -163,21 +165,21 @@ bool ullmann(Graph& gA, Graph& gB){
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
 		v = gA.findIndex(i);							// find vertex v with id i
-		for(auto& c : *carray[i]){						// iterate over candidates for vertex
+		for(int c = 0;c < vnumB;c++){					// iterate over candidates for vertex
+			if(!carray[i][c]) continue;					//   by skipping over noncandidates
 			cneighbors = gB.findIndex(c).neighbors();	// find neighbors of selected candidate
 			for(int n : v.neighbors()){					// iterate over neighbors of v and 
 				disjoint = true;						//   determine if cneighbors and
 														//   v.neighbors() are disjoint
 				for(int cn : cneighbors){
-					ncandidates = *carray[n];
-					if(ncandidates.find(cn) != ncandidates.end()){
+					if(carray[n][cn]){
 						disjoint = false;
 						break;
 					}
 				}
 
 				if(disjoint){					// if cneighbors and v.neighbors() are disjoint
-					(*carray[i]).erase(c);		//   then c must be removed from v's candidate
+					carray[i][c] = false;		//   then c must be removed from v's candidate
 					break;						//   set, and then we can check v's next 
 				}								//   candidate, else, check for next neighbor
 			}
@@ -187,16 +189,22 @@ bool ullmann(Graph& gA, Graph& gB){
 	cout << "\n\nsecondary pruning\n" << endl;
 	for(int i = 0;i < vnumA;i++){
 		cout << i << ": ";
-		for(int c : *carray[i])
-			cout << c << " ";
+		for(int c = 0;c < vnumB;c++)
+			if(carray[i][c]) cout << c << " ";
 		cout << endl;
 	}
 
 	// check if isomorphism is still possible after pruning
-	for(int i = 0;i < vnumA;i++)
-		if((*carray[i]).empty()) return false;
-
-
+	for(int i = 0;i < vnumA;i++){
+		bool empty = true;
+		for(int c = 0;c < vnumB;c++){
+			if(carray[i][c]){
+				empty = false;
+				break;
+			}
+		}
+		if(empty) return false;
+	}
 
 	return false;
 }
