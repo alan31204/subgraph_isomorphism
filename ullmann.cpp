@@ -162,21 +162,21 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	for(int i = 0;i < vnumA;i++) numCandidates[i] = 0;
 	for(int i = 0;i < vnumA;i++){
 		for(int c  = 0;c < vnumB;c++)
-			numCandidates[i] += (int) carray[RIDX(i, c, vnumB)];
+			numCandidates[i] += (int) carray[RIDX(i, c, vnumB)]; // add up the bool array along to see the number of candidates for one position
 	}
 	for(int c = 0;c < vnumB;c++) numCandidatesFor[c] = 0;
 	for(int c = 0;c < vnumB;c++){
 		for(int i = 0;i < vnumA;i++)
-			numCandidatesFor[c] += (int) carray[RIDX(i, c, vnumB)];
+			numCandidatesFor[c] += (int) carray[RIDX(i, c, vnumB)]; // add up the bool array column along to see if candidates overlap for one position
 	}
 
 	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 0) return false;
-		else if(numCandidates[i] > 1) solved = false;
+		if(numCandidates[i] == 0) return false; // No possible combination
+		else if(numCandidates[i] > 1) solved = false; // More than one possible combination
 	}
 	for(int c = 0;c <  vnumB;c++)
-		if(numCandidatesFor[c] > 1) solved = false;
+		if(numCandidatesFor[c] > 1) solved = false; // More than one possible combination
 	if(solved) return true;
 
 	for(int i = 0;i < vnumA;i++){
@@ -186,9 +186,9 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 
 			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 			for(int x = 0;x < vnumA;x++)
-				rcarray[x][c] = false;
+				rcarray[x][c] = false; // removing chosen elements from other candidate array
 			for(int y = 0;y < vnumB;y++)
-				rcarray[i][y] = false;
+				rcarray[i][y] = false; // removing elements that's not chosen in current array
 			rcarray[i][c] = true;
 
 			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
@@ -200,6 +200,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 
 // returns true if gA is a subgraph of gB and false otherwise
 bool ullmann(Graph& gA, Graph& gB){
+	//Variable declaration
 	vnumA = gA.vertices.size();
 	vnumB = gB.vertices.size();
 	int deg, numCandidates[vnumA], numCandidatesFor[vnumB];
@@ -208,7 +209,7 @@ bool ullmann(Graph& gA, Graph& gB){
 	Vertex v;
 	bool disjoint, solved;
 
-	if(vnumA > vnumB) return false;
+	if(vnumA > vnumB) return false; // Checking for degree
 
 	// initialize candidate arrays while doing primary pruning and set all empty values to false
 	for(int i = 0;i < vnumA;i++){
@@ -241,31 +242,34 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
+
+
 	for(int i = 0;i < vnumA;i++) numCandidates[i] = 0;
 	for(int i = 0;i < vnumA;i++){
 		for(int c  = 0;c < vnumB;c++)
-			numCandidates[i] += (int) carray[i][c];
+			numCandidates[i] += (int) carray[i][c]; // add up the bool array along to see the number of candidates for one position
 	}
 	for(int c = 0;c < vnumB;c++) numCandidatesFor[c] = 0;
 	for(int c = 0;c < vnumB;c++){
 		for(int i = 0;i < vnumA;i++)
-			numCandidatesFor[c] += (int) carray[i][c];
+			numCandidatesFor[c] += (int) carray[i][c]; // add up the bool array column along to see if candidates overlap for one position
 	}
 
 	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 0) return false;
-		else if(numCandidates[i] > 1) solved = false;
+		if(numCandidates[i] == 0) return false; // No possible combination
+		else if(numCandidates[i] > 1) solved = false; // More than one possible combination
 	}
 	for(int c = 0;c <  vnumB;c++)
-		if(numCandidatesFor[c] > 1) solved = false;
+		if(numCandidatesFor[c] > 1) solved = false; // More than one possible combination
 	if(solved) return true;
 
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 1) continue;
+		if(numCandidates[i] == 1) continue; // If there is one candidate for this, continue and make decision 
 		for(int c = 0;c < vnumB;c++){
 			if(!carray[i][c]) continue;
 
+			// Prepare the recursive array to be passed into ullmann_descent resursive call
 			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 			for(int x = 0;x < vnumA;x++)
 				rcarray[x][c] = false; // removing chosen elements from other candidate array
@@ -273,6 +277,7 @@ bool ullmann(Graph& gA, Graph& gB){
 				rcarray[i][y] = false; // removing elements that's not chosen in current array
 			rcarray[i][c] = true;
 
+			// Pass the pointer to the first position of matrix for ullmann_descent
 			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 		}
 	}
