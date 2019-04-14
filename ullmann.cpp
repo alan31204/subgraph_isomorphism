@@ -17,6 +17,8 @@
 
 using namespace std;
 
+#define RIDX(i, j, n) (i * n + j)
+
 Vertex::Vertex(){
 
 }
@@ -121,46 +123,99 @@ Graph loadGraph(string filename){
 	return graph;
 }
 
-// returns true if gA is a subgraph of gB and false otherwise
-bool ullmann(Graph& gA, Graph& gB){
-	int vnumA = gA.vertices.size();
-	int vnumB = gB.vertices.size();
-	int deg;
-	// unordered_set<int> *carray[vnumA], ncandidates;
-	bool carray[vnumA][vnumB], cempty[vnumA];
+int vnumA;
+int vnumB;
+
+bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	vector<int> cneighbors;
 	Vertex v;
-	bool disjoint;
+	bool disjoint, solved, rcarray[vnumA][vnumB];
+	int numCandidates[vnumA], numCandidatesFor[vnumB];
 
-	// // initialize candidate sets for each vertex in gA and begin adding candidates with
-	// //   some primary pruning
-	// for(int i = 0;i < vnumA;i++){
-	// 	carray[i] = new unordered_set<int>();
+	// secondary pruning
+	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
+		v = gA.findIndex(i);							// find vertex v with id i
+		for(int c = 0;c < vnumB;c++){					// iterate over candidates for vertex
+			if(!carray[RIDX(i, c, vnumB)]) continue;	//   by skipping over noncandidates
+			cneighbors = gB.findIndex(c).neighbors();	// find neighbors of selected candidate
+			for(int n : v.neighbors()){					// iterate over neighbors of v and 
+				disjoint = true;						//   determine if cneighbors and
+														//   v.neighbors() are disjoint
+				for(int cn : cneighbors){
+					if(carray[RIDX(n, cn, vnumB)]){
+						disjoint = false;
+						break;
+					}
+				}
 
-	// 	// adds vertex to candidate set if has greater or equal degree
-	// 	deg = gA.findIndex(i).degree;
-	// 	for(auto& v : gB.vertices){
-	// 		if(deg <= v.degree)
-	// 			(*carray[i]).insert(v.id);
-	// 	}
-	// }
+				// if cneighbors and v.neighbors() are disjointthen c must be removed from v's
+				//   candidate set, and then we can check v's next candidate, else, check for
+				//   next neighbor
+				if(disjoint){
+					carray[RIDX(i, c, vnumB)] = false;
+					break;
+				}
+			}
+		}
+	}
+
+	for(int i = 0;i < vnumA;i++) numCandidates[i] = 0;
+	for(int i = 0;i < vnumA;i++){
+		for(int c  = 0;c < vnumB;c++)
+			numCandidates[i] += (int) carray[RIDX(i, c, vnumB)];
+	}
+	for(int c = 0;c < vnumB;c++) numCandidatesFor[c] = 0;
+	for(int c = 0;c < vnumB;c++){
+		for(int i = 0;i < vnumA;i++)
+			numCandidatesFor[c] += (int) carray[RIDX(i, c, vnumB)];
+	}
+
+	solved = true;
+	for(int i = 0;i < vnumA;i++){
+		if(numCandidates[i] == 0) return false;
+		else if(numCandidates[i] > 1) solved = false;
+	}
+	for(int c = 0;c <  vnumB;c++)
+		if(numCandidatesFor[c] > 1) solved = false;
+	if(solved) return true;
+
+	for(int i = 0;i < vnumA;i++){
+		if(numCandidates[i] == 1) continue;
+		for(int c = 0;c < vnumB;c++){
+			if(!carray[RIDX(i, c, vnumB)]) continue;
+
+			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
+			for(int x = 0;x < vnumA;x++)
+				rcarray[x][c] = false;
+			for(int y = 0;y < vnumB;y++)
+				rcarray[i][y] = false;
+			rcarray[i][c] = true;
+
+			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
+		}
+	}
+
+	return false;
+}
+
+// returns true if gA is a subgraph of gB and false otherwise
+bool ullmann(Graph& gA, Graph& gB){
+	vnumA = gA.vertices.size();
+	vnumB = gB.vertices.size();
+	int deg, numCandidates[vnumA], numCandidatesFor[vnumB];
+	bool carray[vnumA][vnumB], rcarray[vnumA][vnumB];
+	vector<int> cneighbors;
+	Vertex v;
+	bool disjoint, solved;
+
+	if(vnumA > vnumB) return false;
 
 	// initialize candidate arrays while doing primary pruning and set all empty values to false
 	for(int i = 0;i < vnumA;i++){
 		deg = gA.findIndex(i).degree;
 		for(int j = 0;j < vnumB;j++)
 			carray[i][j] = (deg <= gB.findIndex(j).degree);
-		cempty[i] = false;
 	}
-
-	cout << "\n\nprimary pruning" << endl;
-	for(int i = 0;i < vnumA;i++){
-		cout << i << ": ";
-		for(int c = 0;c < vnumB;c++)
-			if(carray[i][c]) cout << c << " ";
-		cout << endl;
-	}
-
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
@@ -186,24 +241,40 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
-	cout << "\n\nsecondary pruning\n" << endl;
+	for(int i = 0;i < vnumA;i++) numCandidates[i] = 0;
 	for(int i = 0;i < vnumA;i++){
-		cout << i << ": ";
-		for(int c = 0;c < vnumB;c++)
-			if(carray[i][c]) cout << c << " ";
-		cout << endl;
+		for(int c  = 0;c < vnumB;c++)
+			numCandidates[i] += (int) carray[i][c];
+	}
+	for(int c = 0;c < vnumB;c++) numCandidatesFor[c] = 0;
+	for(int c = 0;c < vnumB;c++){
+		for(int i = 0;i < vnumA;i++)
+			numCandidatesFor[c] += (int) carray[i][c];
 	}
 
-	// check if isomorphism is still possible after pruning
+	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		bool empty = true;
+		if(numCandidates[i] == 0) return false;
+		else if(numCandidates[i] > 1) solved = false;
+	}
+	for(int c = 0;c <  vnumB;c++)
+		if(numCandidatesFor[c] > 1) solved = false;
+	if(solved) return true;
+
+	for(int i = 0;i < vnumA;i++){
+		if(numCandidates[i] == 1) continue;
 		for(int c = 0;c < vnumB;c++){
-			if(carray[i][c]){
-				empty = false;
-				break;
-			}
+			if(!carray[i][c]) continue;
+
+			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
+			for(int x = 0;x < vnumA;x++)
+				rcarray[x][c] = false; // removing chosen elements from other candidate array
+			for(int y = 0;y < vnumB;y++)
+				rcarray[i][y] = false; // removing elements that's not chosen in current array
+			rcarray[i][c] = true;
+
+			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 		}
-		if(empty) return false;
 	}
 
 	return false;
