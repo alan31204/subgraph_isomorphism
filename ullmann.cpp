@@ -208,7 +208,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 		}
 	}
 
-	// if no recursive call finds an isomorphims, return false
+	// if no recursive call finds an isomorphim, return false
 	return false;
 }
 
@@ -306,7 +306,7 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
-	// if no recursive call finds an isomorphims, return false
+	// if no recursive call finds an isomorphim, return false
 	return false;
 }
 
