@@ -17,13 +17,10 @@
 
 using namespace std;
 
-
 class Vertex;
 struct weight_vertex;
 class Edge;
 class Graph;
-
-
 
 class Vertex{
 public:
@@ -35,12 +32,10 @@ public:
 	Vertex(int id);
 	vector<int> neighbors();
 
-
 	bool operator<(const Vertex& v2) const;
 	bool operator==(const Vertex& v2) const;
 	bool operator>(const Vertex& v2) const;
 };
-
 
 class Edge{
 public:
@@ -52,7 +47,6 @@ public:
 	Vertex* other(Vertex v) const;
 	
 };
-
 
 class Graph{
 public: 
