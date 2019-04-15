@@ -159,42 +159,56 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 		}
 	}
 
+	// add up the rows of carray to get the number of candidates per vertex in gA
 	for(int i = 0;i < vnumA;i++) numCandidates[i] = 0;
 	for(int i = 0;i < vnumA;i++){
 		for(int c  = 0;c < vnumB;c++)
-			numCandidates[i] += (int) carray[RIDX(i, c, vnumB)]; // add up the bool array along to see the number of candidates for one position
+			numCandidates[i] += (int) carray[RIDX(i, c, vnumB)];
 	}
+
+	// add up the cols of carray to get the number of times each vertex in gB is a candidate
+	//   for a vertex in gA
 	for(int c = 0;c < vnumB;c++) numCandidatesFor[c] = 0;
 	for(int c = 0;c < vnumB;c++){
 		for(int i = 0;i < vnumA;i++)
-			numCandidatesFor[c] += (int) carray[RIDX(i, c, vnumB)]; // add up the bool array column along to see if candidates overlap for one position
+			numCandidatesFor[c] += (int) carray[RIDX(i, c, vnumB)];
 	}
 
+	// assume carray contains a solution, then check if a row of carray is empty (return false),
+	//   if a row of carray has more than one candidate left (solved = false), or if a col of
+	//   carray has more than one true value (solved = false)
 	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 0) return false; // No possible combination
-		else if(numCandidates[i] > 1) solved = false; // More than one possible combination
+		if(numCandidates[i] == 0) return false; 		// empt row
+		else if(numCandidates[i] > 1) solved = false; 	// row has more than one candidate
 	}
 	for(int c = 0;c <  vnumB;c++)
-		if(numCandidatesFor[c] > 1) solved = false; // More than one possible combination
+		if(numCandidatesFor[c] > 1) solved = false; 	// col has more than one true value
+	
+	// return true if carray contains a solution, otherwise continue recursion
 	if(solved) return true;
 
+	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
+	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 1) continue;
+		if(numCandidates[i] == 1) continue;	// skip vertex if already assigned
 		for(int c = 0;c < vnumB;c++){
 			if(!carray[RIDX(i, c, vnumB)]) continue;
 
+			// picked i and c as described above, now continue to construct rcarray
 			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
-			for(int x = 0;x < vnumA;x++)
-				rcarray[x][c] = false; // removing chosen elements from other candidate array
-			for(int y = 0;y < vnumB;y++)
-				rcarray[i][y] = false; // removing elements that's not chosen in current array
-			rcarray[i][c] = true;
+			for(int x = 0;x < vnumA;x++)	// remove c from candidates(x) for all x in gA
+				rcarray[x][c] = false;
+			for(int y = 0;y < vnumB;y++)	// remove all y from candidates(i)
+				rcarray[i][y] = false;
+			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
 
+			// recursively call ullman with rcarray
 			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 		}
 	}
 
+	// if no recursive call finds an isomorphims, return false
 	return false;
 }
 
@@ -209,7 +223,8 @@ bool ullmann(Graph& gA, Graph& gB){
 	Vertex v;
 	bool disjoint, solved;
 
-	if(vnumA > vnumB) return false; // Checking for degree
+	// stop algorithm and return false if gA has more vertices than gB
+	if(vnumA > vnumB) return false;
 
 	// initialize candidate arrays while doing primary pruning and set all empty values to false
 	for(int i = 0;i < vnumA;i++){
@@ -242,46 +257,56 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
-
-
+	// add up the rows of carray to get the number of candidates per vertex in gA
 	for(int i = 0;i < vnumA;i++) numCandidates[i] = 0;
 	for(int i = 0;i < vnumA;i++){
 		for(int c  = 0;c < vnumB;c++)
-			numCandidates[i] += (int) carray[i][c]; // add up the bool array along to see the number of candidates for one position
+			numCandidates[i] += (int) carray[i][c];
 	}
+
+	// add up the cols of carray to get the number of times each vertex in gB is a candidate
+	//   for a vertex in gA
 	for(int c = 0;c < vnumB;c++) numCandidatesFor[c] = 0;
 	for(int c = 0;c < vnumB;c++){
 		for(int i = 0;i < vnumA;i++)
-			numCandidatesFor[c] += (int) carray[i][c]; // add up the bool array column along to see if candidates overlap for one position
+			numCandidatesFor[c] += (int) carray[i][c];
 	}
 
+	// assume carray contains a solution, then check if a row of carray is empty (return false),
+	//   if a row of carray has more than one candidate left (solved = false), or if a col of
+	//   carray has more than one true value (solved = false)
 	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 0) return false; // No possible combination
-		else if(numCandidates[i] > 1) solved = false; // More than one possible combination
+		if(numCandidates[i] == 0) return false;			// empty row
+		else if(numCandidates[i] > 1) solved = false;	// row has more than one candidate
 	}
 	for(int c = 0;c <  vnumB;c++)
-		if(numCandidatesFor[c] > 1) solved = false; // More than one possible combination
+		if(numCandidatesFor[c] > 1) solved = false;		// col has more than one true value
+	
+	// return true if carray contains a solution, otherwise continue recursion
 	if(solved) return true;
 
+	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
+	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 1) continue; // If there is one candidate for this, continue and make decision 
+		if(numCandidates[i] == 1) continue; // skip vertex if already assigned
 		for(int c = 0;c < vnumB;c++){
 			if(!carray[i][c]) continue;
 
-			// Prepare the recursive array to be passed into ullmann_descent resursive call
+			// picked i and c as described above, now continue to construct rcarray
 			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
-			for(int x = 0;x < vnumA;x++)
-				rcarray[x][c] = false; // removing chosen elements from other candidate array
-			for(int y = 0;y < vnumB;y++)
-				rcarray[i][y] = false; // removing elements that's not chosen in current array
-			rcarray[i][c] = true;
+			for(int x = 0;x < vnumA;x++)	// remove c from candidates(x) for all x in gA
+				rcarray[x][c] = false;
+			for(int y = 0;y < vnumB;y++)	// remove all y from candidates(i)
+				rcarray[i][y] = false;
+			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
 
-			// Pass the pointer to the first position of matrix for ullmann_descent
+			// recursively call ullman with rcarray
 			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 		}
 	}
 
+	// if no recursive call finds an isomorphims, return false
 	return false;
 }
 
