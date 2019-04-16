@@ -5,7 +5,6 @@
 #include <vector>
 #include <set>
 #include <utility>
-#include <thread>
 #include <atomic>
 #include <chrono>
 #include <cstring>
@@ -126,6 +125,8 @@ Graph loadGraph(string filename){
 int vnumA;
 int vnumB;
 
+// given starting candidate matrix carray, returns true if it follows that gA is a subgraph of
+//   gB and false otherwise
 bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	vector<int> cneighbors;
 	Vertex v;
@@ -204,7 +205,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
 
 			// recursively call ullman with rcarray
-			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
+			return ullmann_descent(gA,gB,&rcarray[0][0]);
 		}
 	}
 
@@ -302,7 +303,7 @@ bool ullmann(Graph& gA, Graph& gB){
 			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
 
 			// recursively call ullman with rcarray
-			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
+			return ullmann_descent(gA,gB,&rcarray[0][0]);
 		}
 	}
 
