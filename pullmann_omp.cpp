@@ -16,6 +16,9 @@
 #include "pullmann.hpp"
 
 using namespace std;
+#ifndef THREAD_NUM
+#  define THREAD_NUM 8
+#endif
 
 #define RIDX(i, j, n) (i * n + j)
 
@@ -146,11 +149,17 @@ bool ullmann(Graph& gA, Graph& gB){
 	if(vnumA > vnumB) return false;
 
 	// initialize candidate arrays while doing primary pruning and set all empty values to false
+	#pragma scop
+	#pragma omp parallel num_threads(THREAD_NUM)
+	{
+	#pragma omp for private(j, deg)
 	for(int i = 0;i < vnumA;i++){
 		deg = gA.findIndex(i).degree;
 		for(int j = 0;j < vnumB;j++)
 			carray[i][j] = (deg <= gB.findIndex(j).degree);
 	}
+	}
+	#pragma endscop
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
