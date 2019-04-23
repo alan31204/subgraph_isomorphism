@@ -128,7 +128,7 @@ int vnumB;
 
 
 // Do the call of Cilk_spawn to split the work for different threads
-bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int>> work_split){
+bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
@@ -151,7 +151,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	bool ret, disjoint, solved, rcarray[vnumA][vnumB];
 	int numCandidates[vnumA], numCandidatesFor[vnumB];
 
-	vector<pair<int, int>> work, work_split;
+	vector<pair<int, int> > work, work_split;
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
@@ -212,7 +212,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
 	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
 
-	work = vector<pair<int,int>>();
+	work = vector<pair<int,int> >();
 	for(int i = 0;i < vnumA;i++){
 		if(numCandidates[i] == 1) continue;	// skip vertex if already assigned
 		for(int c = 0;c < vnumB;c++){
@@ -221,7 +221,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 		}
 	}
 
-	work_split = vector<pair<int,int>>();
+	work_split = vector<pair<int,int> >();
 	ret = false;
 	for(int n = 0; n < work.size();n++){
 		if(n < work.size()/2){
@@ -258,7 +258,7 @@ bool ullmann(Graph& gA, Graph& gB){
 	Vertex v;
 	bool disjoint, solved;
 
-	vector<pair<int, int>> work, work_split;
+	vector<pair<int, int> > work, work_split;
 
 	// stop algorithm and return false if gA has more vertices than gB
 	if(vnumA > vnumB) return false;
@@ -326,7 +326,7 @@ bool ullmann(Graph& gA, Graph& gB){
 	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
 	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
 
-	work = vector<pair<int, int>>();
+	work = vector<pair<int, int> >();
 	for(int i = 0;i < vnumA;i++){
 		if(numCandidates[i] == 1) continue; // skip vertex if already assigned
 		for(int c = 0;c < vnumB;c++){
@@ -335,7 +335,7 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 	}
 
-	work_split = vector<pair<int, int>>();
+	work_split = vector<pair<int, int> >();
 	ret = false;
 	for(int n = 0;n < work.size();n++){
 		if(n < work.size() / 2){
