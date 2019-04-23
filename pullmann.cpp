@@ -242,7 +242,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 		// recursively call ullman with rcarray
 		if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 	}
-	cilk_sync
+	cilk_sync;
 	// if no recursive call finds an isomorphim, return false
 	return ret;
 }
@@ -344,7 +344,7 @@ bool ullmann(Graph& gA, Graph& gB){
 		}
 
 		if(n == work.size() / 2)
-			ret = cilk_spawn ullmann_spawn(gA, gB, carray, work_split);
+			ret = cilk_spawn ullmann_spawn(gA, gB, &carray[0][0], work_split);
 
 		if(ret) return true;
 
