@@ -6,13 +6,13 @@
 #include <set>
 #include <utility>
 #include <thread>
-#include <atomic>
 #include <chrono>
 #include <cstring>
 #include <string>
 #include <mutex>
 #include <fstream>
 #include <unordered_set>
+#include <cilk/cilk.h>
 #include "pullmann.hpp"
 
 using namespace std;
@@ -126,6 +126,13 @@ Graph loadGraph(string filename){
 int vnumA;
 int vnumB;
 
+
+// Do the call of Cilk_spawn to split the work for different threads
+bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int>> work_split){
+
+}
+
+
 bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	
 	return false;
@@ -141,6 +148,7 @@ bool ullmann(Graph& gA, Graph& gB){
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint, solved;
+	
 
 	// stop algorithm and return false if gA has more vertices than gB
 	if(vnumA > vnumB) return false;

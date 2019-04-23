@@ -5,7 +5,6 @@
 #include <vector>
 #include <set>
 #include <utility>
-#include <atomic>
 #include <chrono>
 #include <cstring>
 #include <string>
