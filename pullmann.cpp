@@ -385,7 +385,7 @@ int main(int argc, char* argv[]){
 	graphA = loadGraph(fileA);
 	graphB = loadGraph(fileB);
 
-	// bool result = ullmann(ref(graphA), ref(graphB));
+	bool result = ullmann(ref(graphA), ref(graphB));
 	cout << "graph A is a subgraph of graph B? " << result << endl;
 
 	return 0;

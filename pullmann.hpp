@@ -63,3 +63,7 @@ public:
 	Vertex findIndex(int index);
 
 };
+
+bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split);
+bool ullmann_descent(Graph& gA, Graph& gB, bool* carray);
+bool ullmann(Graph& gA, Graph& gB);
