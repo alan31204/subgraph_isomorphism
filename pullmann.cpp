@@ -144,11 +144,12 @@ bool ullmann(Graph& gA, Graph& gB){
 	vnumA = gA.vertices.size();
 	vnumB = gB.vertices.size();
 	int deg, numCandidates[vnumA], numCandidatesFor[vnumB];
-	bool carray[vnumA][vnumB], rcarray[vnumA][vnumB];
+	bool ret, carray[vnumA][vnumB], rcarray[vnumA][vnumB];
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint, solved;
-	
+
+	vector<pair<int, int>> work, work_split;
 
 	// stop algorithm and return false if gA has more vertices than gB
 	if(vnumA > vnumB) return false;
@@ -215,26 +216,44 @@ bool ullmann(Graph& gA, Graph& gB){
 
 	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
 	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
+
+	work = vector<pair<int, int>>();
 	for(int i = 0;i < vnumA;i++){
 		if(numCandidates[i] == 1) continue; // skip vertex if already assigned
 		for(int c = 0;c < vnumB;c++){
 			if(!carray[i][c]) continue;
-
-			// picked i and c as described above, now continue to construct rcarray
-			memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
-			for(int x = 0;x < vnumA;x++)	// remove c from candidates(x) for all x in gA
-				rcarray[x][c] = false;
-			for(int y = 0;y < vnumB;y++)	// remove all y from candidates(i)
-				rcarray[i][y] = false;
-			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
-
-			// recursively call ullman with rcarray
-			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
+			work.push_back(make_pair(i, c));
 		}
 	}
 
+	work_split = vector<pair<int, int>>();
+	ret = false;
+	for(int n = 0;n < work.size();n++){
+		if(n < work.size() / 2){
+			work_split.push_back(work[n]);
+			continue;
+		}
+
+		if(n == work.size() / 2)
+			ret = cilk_spawn ullmann_spawn(gA, gB, carray, work_split);
+
+		if(ret) return true;
+
+		// picked i and c as described above, now continue to construct rcarray
+		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
+		for(int x = 0;x < vnumA;x++)			// remove c from candidates(x) for all x in gA
+			rcarray[x][work[n].second] = false;
+		for(int y = 0;y < vnumB;y++)			// remove all y from candidates(i)
+			rcarray[work[n].first][y] = false;
+		rcarray[work[n].first][work[n].second] = true;	// re-add c to candidates(i) as sole member
+
+		// recursively call ullman with rcarray
+		if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
+	}
+
 	// if no recursive call finds an isomorphim, return false
-	return false;
+	cilk_sync;
+	return ret;
 }
 
 
