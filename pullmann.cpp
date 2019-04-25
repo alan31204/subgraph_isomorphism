@@ -128,7 +128,7 @@ int vnumB;
 
 
 // Do the call of Cilk_spawn to split the work for different threads
-bool ullmann_spawn(Graph* gA, Graph* gB, bool* carray, vector<pair<int, int> > work_split){
+bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
@@ -145,7 +145,7 @@ bool ullmann_spawn(Graph* gA, Graph* gB, bool* carray, vector<pair<int, int> > w
 }
 
 
-bool ullmann_descent(Graph* gA, Graph* gB, bool* carray){
+bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 	vector<int> cneighbors;
 	Vertex v;
 	bool ret, disjoint, solved, rcarray[vnumA][vnumB];
@@ -155,11 +155,10 @@ bool ullmann_descent(Graph* gA, Graph* gB, bool* carray){
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
-		// v = gA.findIndex(i);							// find vertex v with id i
-		v = gA->findIndex(i);							// find vertex v with id i
+		v = gA.findIndex(i);							// find vertex v with id i
 		for(int c = 0;c < vnumB;c++){					// iterate over candidates for vertex
 			if(!carray[RIDX(i, c, vnumB)]) continue;	//   by skipping over noncandidates
-			cneighbors = gB->findIndex(c).neighbors();	// find neighbors of selected candidate
+			cneighbors = gB.findIndex(c).neighbors();	// find neighbors of selected candidate
 			for(int n : v.neighbors()){					// iterate over neighbors of v and 
 				disjoint = true;						//   determine if cneighbors and
 														//   v.neighbors() are disjoint
@@ -249,11 +248,10 @@ bool ullmann_descent(Graph* gA, Graph* gB, bool* carray){
 }
 
 // returns true if gA is a subgraph of gB and false otherwise
-bool ullmann(Graph* gA, Graph* gB){
+bool ullmann(Graph& gA, Graph& gB){
 	//Variable declaration
-
-	vnumA = gA->vertices.size();
-	vnumB = gB->vertices.size();
+	vnumA = gA.vertices.size();
+	vnumB = gB.vertices.size();
 	int deg, numCandidates[vnumA], numCandidatesFor[vnumB];
 	bool ret, carray[vnumA][vnumB], rcarray[vnumA][vnumB];
 	vector<int> cneighbors;
@@ -267,17 +265,17 @@ bool ullmann(Graph* gA, Graph* gB){
 
 	// initialize candidate arrays while doing primary pruning and set all empty values to false
 	for(int i = 0;i < vnumA;i++){
-		deg = gA->findIndex(i).degree;
+		deg = gA.findIndex(i).degree;
 		for(int j = 0;j < vnumB;j++)
-			carray[i][j] = (deg <= gB->findIndex(j).degree);
+			carray[i][j] = (deg <= gB.findIndex(j).degree);
 	}
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
-		v = gA->findIndex(i);							// find vertex v with id i
+		v = gA.findIndex(i);							// find vertex v with id i
 		for(int c = 0;c < vnumB;c++){					// iterate over candidates for vertex
 			if(!carray[i][c]) continue;					//   by skipping over noncandidates
-			cneighbors = gB->findIndex(c).neighbors();	// find neighbors of selected candidate
+			cneighbors = gB.findIndex(c).neighbors();	// find neighbors of selected candidate
 			for(int n : v.neighbors()){					// iterate over neighbors of v and 
 				disjoint = true;						//   determine if cneighbors and
 														//   v.neighbors() are disjoint
@@ -384,18 +382,12 @@ int main(int argc, char* argv[]){
 	}
 
 	Graph graphA, graphB;
-	Graph *t_graphA, *t_graphB;
 	graphA = loadGraph(fileA);
 	graphB = loadGraph(fileB);
 
-	t_graphA = &graphA;
-	t_graphB = &graphB;
-
-	bool result = ullmann(t_graphA, t_graphB);
+	bool result = ullmann(ref(graphA), ref(graphB));
 	cout << "graph A is a subgraph of graph B? " << result << endl;
-	delete t_graphA;
-	delete t_graphB;
-	
+
 	return 0;
 }
 
