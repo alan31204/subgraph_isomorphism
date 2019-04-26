@@ -12,6 +12,7 @@
 #include <mutex>
 #include <fstream>
 #include <unordered_set>
+#include <chrono>
 #include <cilk/cilk.h>
 #include "pullmann.hpp"
 
@@ -386,8 +387,18 @@ int main(int argc, char* argv[]){
 	graphA = loadGraph(fileA);
 	graphB = loadGraph(fileB);
 
+	auto begin = chrono::high_resolution_clock::now();
+
 	bool result = ullmann(ref(graphA), ref(graphB));
+
+	auto end = chrono::high_resolution_clock::now();
+	chrono::duration<double> diff = end-begin;
+
+	cout.setf(ios::fixed, ios::floatfield); // set the number to be displayed using floating point instead of scientific
+
 	cout << "graph A is a subgraph of graph B? " << result << endl;
+
+	cout<<"Total time for execution is: "<< diff.count() << " s\n";
 
 	return 0;
 }
