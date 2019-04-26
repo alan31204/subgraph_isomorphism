@@ -156,7 +156,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 
 	vector<pair<int, int> > work, work_split;
 
-	cout<< "Executing ullmann decent!"<<endl
+	cout<< "Executing ullmann decent!"<<endl;
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
