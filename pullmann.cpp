@@ -129,9 +129,6 @@ int vnumB;
 
 // Do the call of Cilk_spawn to split the work for different threads
 bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split){
-	cout<< "Executing ullmann spawn!"<<endl;
-	cout<<"vnumA"<<vnumA<<"\n";
-	cout<<"vnumB"<<vnumB<<"\n";
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
@@ -156,7 +153,6 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 
 	vector<pair<int, int> > work, work_split;
 
-	cout<< "Executing ullmann decent!"<<endl;
 
 	// secondary pruning
 	for(int i = 0;i < vnumA;i++){						// iterate over each vertex id i in gA
@@ -342,7 +338,6 @@ bool ullmann(Graph& gA, Graph& gB){
 
 	work_split = vector<pair<int, int> >();
 	ret = false;
-	cout<<"work vector size" <<work.size()<<endl;
 	for(int n = 0;n < work.size();n++){
 		if(n < work.size() / 2){
 			work_split.push_back(work[n]);
