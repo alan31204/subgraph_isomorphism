@@ -140,7 +140,7 @@ static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, i
 	*ret = false; // if the recursive result didn't give true
 }
 
-bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
+static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint, solved, rcarray[vnumA][vnumB];
