@@ -60,6 +60,6 @@ public:
 
 };
 
-bool ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split);
-bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret);
-bool ullmann(Graph& gA, Graph& gB);
+static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split);
+static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret);
+static bool ullmann(Graph& gA, Graph& gB);

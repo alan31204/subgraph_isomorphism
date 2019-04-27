@@ -242,7 +242,7 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 }
 
 // returns true if gA is a subgraph of gB and false otherwise
-bool ullmann(Graph& gA, Graph& gB){
+static bool ullmann(Graph& gA, Graph& gB){
 	//Variable declaration
 	vnumA = gA.vertices.size();
 	vnumB = gB.vertices.size();
