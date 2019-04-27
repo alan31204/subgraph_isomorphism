@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -pthread -std=c++11
 LDFLAGS = -pthread
-SOURCE = $(ptullmann.cpp)
+SOURCE = ptullmann.cpp
 OBJECTS = $(SOURCE:.cpp=.o)
 TARGET = ptullmann
 
