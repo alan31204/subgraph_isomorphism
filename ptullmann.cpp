@@ -20,9 +20,7 @@ using namespace std;
 
 #define RIDX(i, j, n) (i * n + j)
 
-Vertex::Vertex(){
-
-}
+Vertex::Vertex(){ }
 
 Vertex::Vertex(int id){
 	this->id = id;
@@ -54,10 +52,7 @@ bool Vertex::operator==(const Vertex& v2) const{
 	return this->degree == v2.degree;
 }
 
-
-Edge::Edge(){
-
-}
+Edge::Edge(){ }
 
 Edge::Edge(Vertex* vertex1, Vertex* vertex2){
 	this->v1 = vertex1; 
@@ -363,9 +358,6 @@ bool ullmann(Graph& gA, Graph& gB){
 	return ret;
 }
 
-
-
-
 int main(int argc, char* argv[]){
 	string fileA = "graphs/A";
 	string fileB = "graphs/B";
@@ -398,5 +390,3 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
-
-
