@@ -16,13 +16,10 @@
 
 using namespace std;
 
-
 class Vertex;
 struct weight_vertex;
 class Edge;
 class Graph;
-
-
 
 class Vertex{
 public:
@@ -51,7 +48,6 @@ public:
 	Vertex* other(Vertex v) const;
 	
 };
-
 
 class Graph{
 public: 
