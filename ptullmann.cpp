@@ -120,8 +120,8 @@ int vnumA;
 int vnumB;
 
 // Do the call of Cilk_spawn to split the work for different threads
-void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split,
-				   bool *ret){
+static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split,
+				   		  bool *ret){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
