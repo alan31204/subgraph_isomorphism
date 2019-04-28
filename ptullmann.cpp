@@ -120,7 +120,7 @@ int vnumA;
 int vnumB;
 
 // Do the call of Cilk_spawn to split the work for different threads
-static void ullmann_spawn(Graph& gA, Graph& gB, vector<pair<int, int> >& work_split,
+static void ullmann_spawn(Graph& gA, Graph& gB, vector<pair<int, int> > work_split,
 				   		  bool* ret){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
@@ -224,7 +224,7 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 			continue;
 		}
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), ref(work_split), ret);
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, ret);
 
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 		for(int x = 0;x < vnumA;x++)	// remove c from candidates(x) for all x in gA
@@ -339,7 +339,7 @@ static bool ullmann(Graph& gA, Graph& gB){
 		}
 
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), ref(work_split), &ret);
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, &ret);
 
 		// picked i and c as described above, now continue to construct rcarray
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
