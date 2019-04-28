@@ -234,7 +234,10 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 		rcarray[work[n].first][work[n].second] = true;			// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		if(ullmann_descent(gA,gB,&rcarray[0][0],ret) || *ret) return true;
+		if(ullmann_descent(gA,gB,&rcarray[0][0],ret) || *ret){
+			worker.detach();
+			return true;
+		}
 	}
 	worker.join();
 	// if no recursive call finds an isomorphim, return false
@@ -350,7 +353,10 @@ static bool ullmann(Graph& gA, Graph& gB){
 		rcarray[work[n].first][work[n].second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		if(ullmann_descent(gA, gB, &rcarray[0][0], &ret) || ret) return true;
+		if(ullmann_descent(gA, gB, &rcarray[0][0], &ret) || ret){
+			worker.detach();
+			return true;
+		}
 	}
 
 	// if no recursive call finds an isomorphim, return false
