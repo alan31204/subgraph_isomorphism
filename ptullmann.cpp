@@ -236,12 +236,14 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 		// recursively call ullman with rcarray
 		ullmann_descent(gA,gB,&rcarray[0][0],ret);
 		if(*ret){
-			worker.join();
+			if(worker.joinable()) worker.join();
 			return;
 		}
 	}
 
-	worker.join();
+	// cout << "worker is joinable: " << worker.joinable() << endl;
+
+	if(worker.joinable()) worker.join();
 }
 
 // returns true if gA is a subgraph of gB and false otherwise
@@ -359,12 +361,12 @@ static void ullmann(Graph& gA, Graph& gB, bool* ret){
 		// recursively call ullman with rcarray
 		ullmann_descent(gA, gB, &rcarray[0][0], ret);
 		if(*ret){
-			worker.join();
+			if(worker.joinable()) worker.join();
 			return;
 		}
 	}
 
-	worker.join();
+	if(worker.joinable()) worker.join();
 }
 
 int main(int argc, char* argv[]){
