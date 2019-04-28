@@ -339,7 +339,7 @@ static bool ullmann(Graph& gA, Graph& gB){
 		}
 
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, gA, gB, ref(work_split), &ret);
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), ref(work_split), &ret);
 
 		// picked i and c as described above, now continue to construct rcarray
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
