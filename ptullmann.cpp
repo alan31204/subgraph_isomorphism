@@ -235,7 +235,7 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 
 		// recursively call ullman with rcarray
 		if(ullmann_descent(gA,gB,&rcarray[0][0],ret) || *ret){
-			worker.detach();
+			worker.join();
 			return true;
 		}
 	}
@@ -354,7 +354,7 @@ static bool ullmann(Graph& gA, Graph& gB){
 
 		// recursively call ullman with rcarray
 		if(ullmann_descent(gA, gB, &rcarray[0][0], &ret) || ret){
-			worker.detach();
+			worker.join();
 			return true;
 		}
 	}
