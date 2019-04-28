@@ -120,11 +120,11 @@ int vnumA;
 int vnumB;
 
 // Do the call of Cilk_spawn to split the work for different threads
-static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split,
-				   		  bool *ret){
+static void ullmann_spawn(Graph& gA, Graph& gB, vector<pair<int, int> >& work_split,
+				   		  bool* ret){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
-		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
+		// memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 		for(int x = 0;x < vnumA;x++)			// remove c from candidates(x) for all x in gA
 			rcarray[x][task.second] = false;
 		for(int y = 0;y < vnumB;y++)			// remove all y from candidates(i)
@@ -219,12 +219,12 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 
 	work_split = vector<pair<int,int> >();
 	for(int n = 0; n < work.size();n++){
-		if(n < work.size()/2){
+		if(n < work.size() / 2){
 			work_split.push_back(work[n]);
 			continue;
 		}
-		if(n == work.size()/2)
-			worker = thread(ullmann_spawn, gA, gB, carray, work_split, ret);
+		if(n == work.size() / 2)
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), ref(work_split), ret);
 
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 		for(int x = 0;x < vnumA;x++)	// remove c from candidates(x) for all x in gA
@@ -234,7 +234,7 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 		rcarray[work[n].first][work[n].second] = true;			// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		if(ullmann_descent(gA,gB,&rcarray[0][0]) || *ret) return true;
+		if(ullmann_descent(gA,gB,&rcarray[0][0],ret) || *ret) return true;
 	}
 	worker.join();
 	// if no recursive call finds an isomorphim, return false
@@ -339,7 +339,7 @@ static bool ullmann(Graph& gA, Graph& gB){
 		}
 
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, gA, gB, carray, work_split, &ret);
+			worker = thread(ullmann_spawn, gA, gB, ref(work_split), &ret);
 
 		// picked i and c as described above, now continue to construct rcarray
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
