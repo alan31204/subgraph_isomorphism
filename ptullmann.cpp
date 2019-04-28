@@ -132,15 +132,12 @@ static void ullmann_spawn(Graph& gA, Graph& gB, vector<pair<int, int> > work_spl
 		rcarray[task.first][task.second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		if(ullmann_descent(gA, gB, &rcarray[0][0], ret)){
-			*ret = true;
-			return;
-		}
+		ullmann_descent(gA, gB, &rcarray[0][0], ret);
+		if(*ret) return;
 	}
-	*ret = false; // if the recursive result didn't give true
 }
 
-static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
+static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint, solved, rcarray[vnumA][vnumB];
@@ -196,14 +193,17 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 	//   carray has more than one true value (solved = false)
 	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 0) return false; 		// empt row
+		if(numCandidates[i] == 0) return; 		// empt row
 		else if(numCandidates[i] > 1) solved = false; 	// row has more than one candidate
 	}
 	for(int c = 0;c <  vnumB;c++)
 		if(numCandidatesFor[c] > 1) solved = false; 	// col has more than one true value
 	
 	// return true if carray contains a solution, otherwise continue recursion
-	if(solved) return true;
+	if(solved){
+		*ret = true;
+		return;
+	}
 
 	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
 	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
@@ -234,23 +234,23 @@ static bool ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 		rcarray[work[n].first][work[n].second] = true;			// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		if(ullmann_descent(gA,gB,&rcarray[0][0],ret) || *ret){
+		ullmann_descent(gA,gB,&rcarray[0][0],ret);
+		if(*ret){
 			worker.join();
-			return true;
+			return;
 		}
 	}
+
 	worker.join();
-	// if no recursive call finds an isomorphim, return false
-	return *ret;
 }
 
 // returns true if gA is a subgraph of gB and false otherwise
-static bool ullmann(Graph& gA, Graph& gB){
+static void ullmann(Graph& gA, Graph& gB, bool* ret){
 	//Variable declaration
 	vnumA = gA.vertices.size();
 	vnumB = gB.vertices.size();
 	int deg, numCandidates[vnumA], numCandidatesFor[vnumB];
-	bool ret, carray[vnumA][vnumB], rcarray[vnumA][vnumB];
+	bool carray[vnumA][vnumB], rcarray[vnumA][vnumB];
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint, solved;
@@ -258,8 +258,10 @@ static bool ullmann(Graph& gA, Graph& gB){
 	thread worker;
 	vector<pair<int, int> > work, work_split;
 
+	*ret = false;
+
 	// stop algorithm and return false if gA has more vertices than gB
-	if(vnumA > vnumB) return false;
+	if(vnumA > vnumB) return;
 
 	// initialize candidate arrays while doing primary pruning and set all empty values to false
 	for(int i = 0;i < vnumA;i++){
@@ -312,14 +314,17 @@ static bool ullmann(Graph& gA, Graph& gB){
 	//   carray has more than one true value (solved = false)
 	solved = true;
 	for(int i = 0;i < vnumA;i++){
-		if(numCandidates[i] == 0) return false;			// empty row
+		if(numCandidates[i] == 0) return;				// empty row
 		else if(numCandidates[i] > 1) solved = false;	// row has more than one candidate
 	}
 	for(int c = 0;c <  vnumB;c++)
 		if(numCandidatesFor[c] > 1) solved = false;		// col has more than one true value
 	
 	// return true if carray contains a solution, otherwise continue recursion
-	if(solved) return true;
+	if(solved){
+		*ret = true;
+		return;
+	}
 
 	// pick an i in gA, c in candidates(i) where |candidates(i)| > 1 and assign i to c in
 	//   rcarray (otherwise a copy of carray) and then pass rcarray to new recursive call
@@ -334,7 +339,6 @@ static bool ullmann(Graph& gA, Graph& gB){
 	}
 
 	work_split = vector<pair<int, int> >();
-	ret = false;
 	for(int n = 0;n < work.size();n++){
 		if(n < work.size() / 2){
 			work_split.push_back(work[n]);
@@ -342,7 +346,7 @@ static bool ullmann(Graph& gA, Graph& gB){
 		}
 
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, &ret);
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, ret);
 
 		// picked i and c as described above, now continue to construct rcarray
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
@@ -353,15 +357,14 @@ static bool ullmann(Graph& gA, Graph& gB){
 		rcarray[work[n].first][work[n].second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		if(ullmann_descent(gA, gB, &rcarray[0][0], &ret) || ret){
+		ullmann_descent(gA, gB, &rcarray[0][0], ret);
+		if(*ret){
 			worker.join();
-			return true;
+			return;
 		}
 	}
 
-	// if no recursive call finds an isomorphim, return false
 	worker.join();
-	return ret;
 }
 
 int main(int argc, char* argv[]){
@@ -383,7 +386,15 @@ int main(int argc, char* argv[]){
 
 	auto begin = chrono::high_resolution_clock::now();
 
-	bool result = ullmann(ref(graphA), ref(graphB));
+	bool result;
+	// try {
+ //        result = ullmann(ref(graphA), ref(graphB));
+ //    } catch(const std::system_error& e) {
+ //        std::cout << "Caught system_error with code " << e.code() 
+ //                  << " meaning " << e.what() << '\n';
+ //    }
+
+	ullmann(ref(graphA), ref(graphB), &result);
 
 	auto end = chrono::high_resolution_clock::now();
 	chrono::duration<double> diff = end-begin;
