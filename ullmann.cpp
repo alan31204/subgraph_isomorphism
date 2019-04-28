@@ -327,8 +327,19 @@ int main(int argc, char* argv[]){
 	graphA = loadGraph(fileA);
 	graphB = loadGraph(fileB);
 
+	auto begin = chrono::high_resolution_clock::now();
+
+	bool result = ullmann(ref(graphA), ref(graphB));
+
+	auto end = chrono::high_resolution_clock::now();
+	chrono::duration<double> diff = end-begin;
+
+	cout.setf(ios::fixed, ios::floatfield); 
+
 	bool result = ullmann(ref(graphA), ref(graphB));
 	cout << "graph A is a subgraph of graph B? " << result << endl;
+
+	cout<<"Total time for execution is: "<< diff.count() << " s\n";
 
 	return 0;
 }
