@@ -335,8 +335,6 @@ int main(int argc, char* argv[]){
 	chrono::duration<double> diff = end-begin;
 
 	cout.setf(ios::fixed, ios::floatfield); 
-
-	bool result = ullmann(ref(graphA), ref(graphB));
 	cout << "graph A is a subgraph of graph B? " << result << endl;
 
 	cout<<"Total time for execution is: "<< diff.count() << " s\n";
