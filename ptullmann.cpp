@@ -224,7 +224,7 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 			continue;
 		}
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, ret);
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), carray, work_split, ret);
 
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 		for(int x = 0;x < vnumA;x++)				// remove c from candidates(x) for all x in gA
@@ -348,7 +348,7 @@ static void ullmann(Graph& gA, Graph& gB, bool* ret){
 		}
 
 		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, ret);
+			worker = thread(ullmann_spawn, ref(gA), ref(gB), &carray[0][0], work_split, ret);
 
 		// picked i and c as described above, now continue to construct rcarray
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
