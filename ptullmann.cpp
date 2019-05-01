@@ -6,7 +6,6 @@
 #include <set>
 #include <utility>
 #include <thread>
-// #include <atomic>
 #include <chrono>
 #include <cstring>
 #include <string>
@@ -119,12 +118,13 @@ Graph loadGraph(string filename){
 int vnumA;
 int vnumB;
 
-// Do the call of Cilk_spawn to split the work for different threads
-static void ullmann_spawn(Graph& gA, Graph& gB, vector<pair<int, int> > work_split,
+// When run in worker thread, execute ullmann_descent on each of the tasks in work_split and set
+//   *ret to true if isomorphism is found
+static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split,
 				   		  bool* ret){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
-		// memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
+		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 		for(int x = 0;x < vnumA;x++)			// remove c from candidates(x) for all x in gA
 			rcarray[x][task.second] = false;
 		for(int y = 0;y < vnumB;y++)			// remove all y from candidates(i)
@@ -162,7 +162,7 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 					}
 				}
 
-				// if cneighbors and v.neighbors() are disjointthen c must be removed from v's
+				// if cneighbors and v.neighbors() are disjoint then c must be removed from v's
 				//   candidate set, and then we can check v's next candidate, else, check for
 				//   next neighbor
 				if(disjoint){
@@ -227,11 +227,11 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 			worker = thread(ullmann_spawn, ref(gA), ref(gB), work_split, ret);
 
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
-		for(int x = 0;x < vnumA;x++)	// remove c from candidates(x) for all x in gA
+		for(int x = 0;x < vnumA;x++)				// remove c from candidates(x) for all x in gA
 			rcarray[x][work[n].second] = false;
-		for(int y = 0;y < vnumB;y++)	// remove all y from candidates(i)
+		for(int y = 0;y < vnumB;y++)				// remove all y from candidates(i)
 			rcarray[work[n].first][y] = false;
-		rcarray[work[n].first][work[n].second] = true;			// re-add c to candidates(i) as sole member
+		rcarray[work[n].first][work[n].second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
 		ullmann_descent(gA,gB,&rcarray[0][0],ret);
@@ -389,13 +389,6 @@ int main(int argc, char* argv[]){
 	auto begin = chrono::high_resolution_clock::now();
 
 	bool result;
-	// try {
- //        result = ullmann(ref(graphA), ref(graphB));
- //    } catch(const std::system_error& e) {
- //        std::cout << "Caught system_error with code " << e.code() 
- //                  << " meaning " << e.what() << '\n';
- //    }
-
 	ullmann(ref(graphA), ref(graphB), &result);
 
 	auto end = chrono::high_resolution_clock::now();
