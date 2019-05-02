@@ -204,7 +204,7 @@ bool ullmann_descent(Graph& gA, Graph& gB, bool* carray){
 			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
 
 			// recursively call ullman with rcarray
-			return ullmann_descent(gA,gB,&rcarray[0][0]);
+			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 		}
 	}
 
@@ -302,7 +302,7 @@ bool ullmann(Graph& gA, Graph& gB){
 			rcarray[i][c] = true;			// re-add c to candidates(i) as sole member
 
 			// recursively call ullman with rcarray
-			return ullmann_descent(gA,gB,&rcarray[0][0]);
+			if(ullmann_descent(gA,gB,&rcarray[0][0])) return true;
 		}
 	}
 
