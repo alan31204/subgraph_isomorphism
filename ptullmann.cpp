@@ -121,7 +121,7 @@ int vnumB;
 // When run in worker thread, execute ullmann_descent on each of the tasks in work_split and set
 //   *ret to true if isomorphism is found
 static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, int> > work_split,
-				   		  bool* ret){
+				   		  bool* ret, int depth){
 	bool rcarray[vnumA][vnumB];
 	for(pair<int, int> task : work_split){
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
@@ -132,12 +132,12 @@ static void ullmann_spawn(Graph& gA, Graph& gB, bool* carray, vector<pair<int, i
 		rcarray[task.first][task.second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		ullmann_descent(gA, gB, &rcarray[0][0], ret);
+		ullmann_descent(gA, gB, &rcarray[0][0], ret, (depth == 0) ? 0 : depth - 1);
 		if(*ret) return;
 	}
 }
 
-static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
+static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret, int depth){
 	vector<int> cneighbors;
 	Vertex v;
 	bool disjoint, solved, rcarray[vnumA][vnumB];
@@ -219,12 +219,14 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 
 	work_split = vector<pair<int,int> >();
 	for(int n = 0; n < work.size();n++){
-		if(n < work.size() / 2){
-			work_split.push_back(work[n]);
-			continue;
+		if(depth != 0){
+			if(n < work.size() / 2){
+				work_split.push_back(work[n]);
+				continue;
+			}
+			if(n == work.size() / 2)
+				worker = thread(ullmann_spawn, ref(gA), ref(gB), carray, work_split, ret, depth);
 		}
-		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), carray, work_split, ret);
 
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
 		for(int x = 0;x < vnumA;x++)				// remove c from candidates(x) for all x in gA
@@ -234,7 +236,7 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 		rcarray[work[n].first][work[n].second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		ullmann_descent(gA,gB,&rcarray[0][0],ret);
+		ullmann_descent(gA, gB, &rcarray[0][0], ret, (depth == 0) ? 0 : depth - 1);
 		if(*ret){
 			if(worker.joinable()) worker.join();
 			return;
@@ -243,11 +245,11 @@ static void ullmann_descent(Graph& gA, Graph& gB, bool* carray, bool* ret){
 
 	// cout << "worker is joinable: " << worker.joinable() << endl;
 
-	if(worker.joinable()) worker.join();
+	if(depth != 0 && worker.joinable()) worker.join();
 }
 
 // returns true if gA is a subgraph of gB and false otherwise
-static void ullmann(Graph& gA, Graph& gB, bool* ret){
+static void ullmann(Graph& gA, Graph& gB, bool* ret, int depth){
 	//Variable declaration
 	vnumA = gA.vertices.size();
 	vnumB = gB.vertices.size();
@@ -342,13 +344,17 @@ static void ullmann(Graph& gA, Graph& gB, bool* ret){
 
 	work_split = vector<pair<int, int> >();
 	for(int n = 0;n < work.size();n++){
-		if(n < work.size() / 2){
-			work_split.push_back(work[n]);
-			continue;
-		}
+		if(depth != 0){
+			if(n < work.size() / 2){
+				work_split.push_back(work[n]);
+				continue;
+			}
 
-		if(n == work.size() / 2)
-			worker = thread(ullmann_spawn, ref(gA), ref(gB), &carray[0][0], work_split, ret);
+			if(n == work.size() / 2){
+				worker = thread(ullmann_spawn, ref(gA), ref(gB), &carray[0][0], work_split,
+								ret, depth);
+			}
+		}
 
 		// picked i and c as described above, now continue to construct rcarray
 		memcpy(rcarray, carray, vnumA * vnumB * sizeof(bool));
@@ -359,19 +365,20 @@ static void ullmann(Graph& gA, Graph& gB, bool* ret){
 		rcarray[work[n].first][work[n].second] = true;	// re-add c to candidates(i) as sole member
 
 		// recursively call ullman with rcarray
-		ullmann_descent(gA, gB, &rcarray[0][0], ret);
+		ullmann_descent(gA, gB, &rcarray[0][0], ret, (depth == 0) ? 0 : depth - 1);
 		if(*ret){
 			if(worker.joinable()) worker.join();
 			return;
 		}
 	}
 
-	if(worker.joinable()) worker.join();
+	if(depth != 0 && worker.joinable()) worker.join();
 }
 
 int main(int argc, char* argv[]){
 	string fileA = "graphs/A";
 	string fileB = "graphs/B";
+	int depth = -1;
 
 	for(int i = 1;i < argc;i++){
 		if(strcmp(argv[i], "-gA") == 0 && i + 1 < argc){
@@ -379,6 +386,9 @@ int main(int argc, char* argv[]){
 		}
 		else if(strcmp(argv[i], "-gB") == 0 && i + 1 < argc){
 			fileB = (argv[i + 1]);
+		}
+		else if(strcmp(argv[i], "-d") == 0 && i + 1 < argc){
+			depth = atoi(argv[i + 1]);
 		}
 	}
 
@@ -389,7 +399,7 @@ int main(int argc, char* argv[]){
 	auto begin = chrono::high_resolution_clock::now();
 
 	bool result;
-	ullmann(ref(graphA), ref(graphB), &result);
+	ullmann(ref(graphA), ref(graphB), &result, depth);
 
 	auto end = chrono::high_resolution_clock::now();
 	chrono::duration<double> diff = end-begin;
